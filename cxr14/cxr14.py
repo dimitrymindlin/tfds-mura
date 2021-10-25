@@ -98,25 +98,43 @@ class CXR14(tfds.core.GeneratorBasedBuilder):
       'https://nihcc.box.com/shared/static/hhq8fkdgvcari67vfhs7ppg2w6ni4jze.gz',
       'https://nihcc.box.com/shared/static/ioqwiy20ihqwyr8pf4c24eazhh281pbu.gz']
 
-    images_path = dl_manager.download_and_extract(data_part_links)
-    images_path = images_path[0] / 'images'
+    image_paths = dl_manager.download_and_extract(data_part_links) #TODO how to merge dataset parts
 
     csv_train_path = os.path.join(_DIR, 'default_split/train.csv')
     csv_test_path = os.path.join(_DIR, 'default_split/test.csv')
 
     return {
-        'train': self._generate_examples(images_path, csv_train_path),
-        'test': self._generate_examples(images_path, csv_test_path),
+        'train': self._generate_examples(image_paths, csv_train_path),
+        'test': self._generate_examples(image_paths, csv_test_path),
     }
 
-  def _generate_examples(self, path, csv_path):
+  def _generate_examples(self, image_paths, csv_path):
     """Yields examples."""
+    assert len(image_paths) > 0, 'could not download and extract all dataset paths'
+
     with open(csv_path, newline='') as csv_file:
+      cur_part_dir = image_paths[0] #TODO how to merge dataset parts
       csv_reader = csv.reader(csv_file, delimiter=',')
       next(csv_reader)
       for row in csv_reader:
-        yield 'key', {
-            'name': row[1],
-            'image': path / str(row[0]),
-            'label': row[3:],
-          }
+        image_path = cur_part_dir / 'images' / str(row[0])
+
+        #check in which dataset part the image exists
+        image_exists = True
+        if not image_path.exists(): #TODO possible performance leak
+          image_exists = False
+          for new_path in image_paths:
+            image_path = new_path / 'images' / str(row[0])
+            #print('check path' + str(image_path))
+            if image_path.exists():
+              cur_part_dir = new_path
+              image_exists = True
+              break
+
+        #skip missing images
+        if image_exists:
+          yield 'key', {
+              'name': row[1],
+              'image': image_path,
+              'label': row[3:],
+            }
