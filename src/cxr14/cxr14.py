@@ -133,7 +133,8 @@ class CXR14(tfds.core.GeneratorBasedBuilder):
 
         #skip missing images
         if image_exists:
-          yield 'key', {
+          image_id = int(((image_path.stem).replace('_',''))) #00000901_005.png to 901005
+          yield image_id, {
               'name': row[1],
               'image': image_path,
               'label': row[3:],
