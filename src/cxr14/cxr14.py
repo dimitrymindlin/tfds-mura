@@ -1,6 +1,8 @@
 """cxr14 dataset."""
 
 import tensorflow_datasets as tfds
+import pandas as pd
+import numpy as np
 import csv
 import os
 
@@ -60,9 +62,10 @@ _DIR = os.path.dirname(__file__)
 class CXR14(tfds.core.GeneratorBasedBuilder):
   """DatasetBuilder for cxr14 dataset."""
 
-  VERSION = tfds.core.Version('1.0.0')
+  VERSION = tfds.core.Version('1.1.0')
   RELEASE_NOTES = {
       '1.0.0': 'Initial release.',
+      '1.1.0': 'Add validation split and training class weights.',
   }
 
   def _info(self) -> tfds.core.DatasetInfo:
@@ -80,6 +83,7 @@ class CXR14(tfds.core.GeneratorBasedBuilder):
         supervised_keys=('image', 'label'),
         homepage='https://nihcc.app.box.com/v/ChestXray-NIHCC',
         citation=_CITATION,
+        metadata=tfds.core.MetadataDict(class_weights=self._get_class_weights())
     )
 
   def _split_generators(self, dl_manager: tfds.download.DownloadManager):
@@ -98,13 +102,15 @@ class CXR14(tfds.core.GeneratorBasedBuilder):
       'https://nihcc.box.com/shared/static/hhq8fkdgvcari67vfhs7ppg2w6ni4jze.gz',
       'https://nihcc.box.com/shared/static/ioqwiy20ihqwyr8pf4c24eazhh281pbu.gz']
 
-    image_paths = dl_manager.download_and_extract(data_part_links) #TODO how to merge dataset parts
+    image_paths = dl_manager.download_and_extract(data_part_links)
 
     csv_train_path = os.path.join(_DIR, 'default_split/train.csv')
+    csv_val_path = os.path.join(_DIR, 'default_split/val.csv')
     csv_test_path = os.path.join(_DIR, 'default_split/test.csv')
 
     return {
         'train': self._generate_examples(image_paths, csv_train_path),
+        'val': self._generate_examples(image_paths, csv_val_path),
         'test': self._generate_examples(image_paths, csv_test_path),
     }
 
@@ -139,3 +145,23 @@ class CXR14(tfds.core.GeneratorBasedBuilder):
               'image': image_path,
               'label': row[3:],
             }
+
+  def _get_single_class_weight(self, pos_counts, total_counts):
+    denominator = (total_counts - pos_counts) + pos_counts
+    return {
+        0: pos_counts / denominator,
+        1: (denominator - pos_counts) / denominator,
+    }
+
+  def _get_class_weights(self):
+    df = pd.read_csv(os.path.join(_DIR, 'default_split/train.csv'))
+    total_count = df.shape[0]
+    labels = df[_Classes].values
+    positive_counts = np.sum(labels, axis=0)
+    class_positive_counts = dict(zip(_Classes, positive_counts))
+    class_names = list(class_positive_counts.keys())
+    label_counts = np.array(list(class_positive_counts.values()))
+    class_weights = []
+    for i, _ in enumerate(class_names):
+        class_weights.append(self._get_single_class_weight(label_counts[i], total_count))
+    return class_weights
