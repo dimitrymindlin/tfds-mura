@@ -1,4 +1,4 @@
-name: chexnet
+name: mura
 channels:
   - conda-forge
   - defaults
@@ -7,9 +7,3 @@ dependencies:
   - tensorflow-datasets=4.4.0
   - tensorflow-gpu
   - numpy
-  - pandas
-  - jupyterlab
-  - ipywidgets
-  - ipykernel
-  - iprogress
-  - matplotlib
