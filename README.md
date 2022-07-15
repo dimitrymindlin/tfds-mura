@@ -1,5 +1,5 @@
-# tfds-cxr14
-ChestX-ray14 dataset for tfds
+# Mura Dataset
+Mura dataset for tfds
 
 ## TODO
 Remove csv data from this repo
