@@ -132,6 +132,44 @@ def get_split_dataset_paths(body_parts: List[str], tfds_path: str):
     train_x, train_y, valid_x, valid_y, test_x, test_y = get_mura_data_paths(body_parts, tfds_path)
     A_img_paths = [filename for filename in train_x if "negative" in filename]
     B_img_paths = [filename for filename in train_x if "positive" in filename]
+    A_img_paths_valid = [filename for filename in valid_x if "negative" in filename]
+    B_img_paths_valid = [filename for filename in valid_x if "positive" in filename]
     A_img_paths_test = [filename for filename in test_x if "negative" in filename]
     B_img_paths_test = [filename for filename in test_x if "positive" in filename]
-    return A_img_paths, B_img_paths, A_img_paths_test, B_img_paths_test
+    return A_img_paths, B_img_paths, \
+           A_img_paths_valid, B_img_paths_valid, \
+           A_img_paths_test, B_img_paths_test
+
+
+def get_mura_ds_by_body_part_split_class(body_parts, tfds_path, batch_size, crop_size, load_size):
+    """
+    Method loads the MURA data filtered by the specified body part two datasets split by class.
+    Can be used to train CycleGANs.
+    """
+    A_train, B_train, A_valid, B_valid, A_test, B_test = get_split_dataset_paths(body_parts, tfds_path)
+    A_B_dataset, len_dataset_train = make_zip_dataset(A_train, B_train, batch_size, load_size,
+                                                      crop_size, training=True, repeat=False)
+    A_B_dataset_test, _ = make_zip_dataset(A_test, B_test, batch_size, load_size,
+                                           crop_size, training=False, repeat=True)
+    return A_B_dataset, A_B_dataset_test, len_dataset_train
+
+
+def get_mura_data_by_body_part(body_parts, tfds_path, batch_size, crop_size, load_size, special_normalisation=None):
+    """
+    Method loads the MURA data filtered by the specified body part in one dataset. Can be used to train classifiers.
+    """
+    A_train, B_train, A_valid, B_valid, A_test, B_test = get_split_dataset_paths(body_parts, tfds_path)
+    A_B_dataset, len_dataset_train = make_concat_dataset(A_train, B_train, batch_size,
+                                                         load_size,
+                                                         crop_size, training=True, repeat=False,
+                                                         special_normalisation=special_normalisation)
+
+    A_B_dataset_valid, _ = make_concat_dataset(A_valid, B_valid, batch_size,
+                                               load_size,
+                                               crop_size, training=True, repeat=False,
+                                               special_normalisation=special_normalisation)
+
+    A_B_dataset_test, _ = make_concat_dataset(A_test, B_test, batch_size, load_size,
+                                              crop_size, training=True, repeat=False,
+                                              special_normalisation=special_normalisation)
+    return A_B_dataset, A_B_dataset_valid, A_B_dataset_test, len_dataset_train
