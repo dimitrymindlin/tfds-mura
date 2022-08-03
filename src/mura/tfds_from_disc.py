@@ -154,7 +154,7 @@ def get_mura_ds_by_body_part_split_class(body_parts, tfds_path, batch_size, crop
     return A_B_dataset, A_B_dataset_test, len_dataset_train
 
 
-def get_mura_data_by_body_part(body_parts, tfds_path, batch_size, crop_size, load_size, special_normalisation=None):
+def get_mura_ds_by_body_part(body_parts, tfds_path, batch_size, crop_size, load_size, special_normalisation=None):
     """
     Method loads the MURA data filtered by the specified body part in one dataset. Can be used to train classifiers.
     """
