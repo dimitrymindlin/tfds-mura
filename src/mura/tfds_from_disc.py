@@ -3,7 +3,7 @@ from typing import List
 import tensorflow as tf
 from sklearn.model_selection import train_test_split
 from sklearn.utils import shuffle
-import src.tf2lib as tl
+import tf2lib as tl
 import tensorflow_addons as tfa
 
 
