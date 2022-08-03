@@ -111,7 +111,8 @@ def get_mura_data_paths(body_parts: List[str], tfds_path: str, test_size=0.2):
                         in d
                         if
                         str(x, encoding='utf-8').strip().split('/')[2] in body_parts]
-
+        if len(imgs) == 0:
+            raise FileNotFoundError(f"Couldn't filter dataset based on {body_parts}. Check if spelling is correct.")
         # imgs= [x.replace("/", "\\") for x in imgs]
         labels = [x.split('_')[-1].split('/')[0] for x in imgs]
         return imgs, labels
