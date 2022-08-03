@@ -47,7 +47,8 @@ def make_dataset(img_paths, batch_size, load_size, crop_size, training, drop_rem
                                        labels=labels)
 
 
-def make_zip_dataset(A_img_paths, B_img_paths, batch_size, load_size, crop_size, training, shuffle=False, repeat=False):
+def make_zip_dataset(A_img_paths, B_img_paths, batch_size, load_size, crop_size, training, shuffle=False, repeat=False,
+                     special_normalisation=None):
     # zip two datasets aligned by the longer one
     if repeat:
         A_repeat = B_repeat = None  # cycle both
@@ -60,9 +61,9 @@ def make_zip_dataset(A_img_paths, B_img_paths, batch_size, load_size, crop_size,
             B_repeat = 1
 
     A_dataset = make_dataset(A_img_paths, batch_size, load_size, crop_size, training, drop_remainder=True,
-                             shuffle=shuffle, repeat=A_repeat)
+                             shuffle=shuffle, repeat=A_repeat, special_normalisation=special_normalisation)
     B_dataset = make_dataset(B_img_paths, batch_size, load_size, crop_size, training, drop_remainder=True,
-                             shuffle=shuffle, repeat=B_repeat)
+                             shuffle=shuffle, repeat=B_repeat, special_normalisation=special_normalisation)
 
     A_B_dataset = tf.data.Dataset.zip((A_dataset, B_dataset))
     len_dataset = max(len(A_img_paths), len(B_img_paths)) // batch_size
@@ -141,22 +142,38 @@ def get_split_dataset_paths(body_parts: List[str], tfds_path: str):
            A_img_paths_test, B_img_paths_test
 
 
-def get_mura_ds_by_body_part_split_class(body_parts, tfds_path, batch_size, crop_size, load_size):
+def get_mura_ds_by_body_part_split_class(body_parts, tfds_path, batch_size, crop_size, load_size,
+                                         special_normalisation=None):
     """
     Method loads the MURA data filtered by the specified body part two datasets split by class.
     Can be used to train CycleGANs.
+    body_parts: List of body parts to work with. Check MURA documentation for available body_parts.
+    tfds_path: Path to tensorflow datasets directory.
+    batch_size: Batch size for the data loader.
+    crop_size: Final image size that will be cropped to.
+    load_size: The image will be loaded with this size.
+    special_normalisation: Can be any normalisation from keras preprocessing (e.g. inception_preprocessing)
     """
     A_train, B_train, A_valid, B_valid, A_test, B_test = get_split_dataset_paths(body_parts, tfds_path)
     A_B_dataset, len_dataset_train = make_zip_dataset(A_train, B_train, batch_size, load_size,
-                                                      crop_size, training=True, repeat=False)
+                                                      crop_size, training=True, repeat=False,
+                                                      special_normalisation=special_normalisation)
+
     A_B_dataset_test, _ = make_zip_dataset(A_test, B_test, batch_size, load_size,
-                                           crop_size, training=False, repeat=True)
+                                           crop_size, training=False, repeat=True,
+                                           special_normalisation=special_normalisation)
     return A_B_dataset, A_B_dataset_test, len_dataset_train
 
 
 def get_mura_ds_by_body_part(body_parts, tfds_path, batch_size, crop_size, load_size, special_normalisation=None):
     """
     Method loads the MURA data filtered by the specified body part in one dataset. Can be used to train classifiers.
+    body_parts: List of body parts to work with. Check MURA documentation for available body_parts.
+    tfds_path: Path to tensorflow datasets directory.
+    batch_size: Batch size for the data loader.
+    crop_size: Final image size that will be cropped to.
+    load_size: The image will be loaded with this size.
+    special_normalisation: Can be any normalisation from keras preprocessing (e.g. inception_preprocessing)
     """
     A_train, B_train, A_valid, B_valid, A_test, B_test = get_split_dataset_paths(body_parts, tfds_path)
     A_B_dataset, len_dataset_train = make_concat_dataset(A_train, B_train, batch_size,
