@@ -3,7 +3,7 @@ from typing import List
 import tensorflow as tf
 from sklearn.model_selection import train_test_split
 from sklearn.utils import shuffle
-import tf2lib as tl
+import src.tf2lib as tl
 import tensorflow_addons as tfa
 
 
@@ -191,3 +191,7 @@ def get_mura_ds_by_body_part(body_parts, tfds_path, batch_size, crop_size, load_
                                               crop_size, training=True, repeat=False,
                                               special_normalisation=special_normalisation)
     return A_B_dataset, A_B_dataset_valid, A_B_dataset_test, len_dataset_train
+
+
+get_mura_ds_by_body_part_split_class('XR_WRIST', "/Users/dimitrymindlin/tensorflow_datasets", 32, 256, 256,
+                                     special_normalisation=None)
