@@ -160,10 +160,14 @@ def get_mura_ds_by_body_part_split_class(body_parts, tfds_path, batch_size, crop
                                                       crop_size, training=True, repeat=False,
                                                       special_normalisation=special_normalisation)
 
+    A_B_dataset_valid, _ = make_zip_dataset(A_valid, B_valid, batch_size, load_size,
+                                    crop_size, training=False, repeat=True,
+                                    special_normalisation=special_normalisation)
+
     A_B_dataset_test, _ = make_zip_dataset(A_test, B_test, batch_size, load_size,
                                            crop_size, training=False, repeat=True,
                                            special_normalisation=special_normalisation)
-    return A_B_dataset, A_B_dataset_test, len_dataset_train
+    return A_B_dataset, A_B_dataset_valid, A_B_dataset_test, len_dataset_train
 
 
 def get_mura_ds_by_body_part(body_parts, tfds_path, batch_size, crop_size, load_size, special_normalisation=None):
