@@ -193,5 +193,5 @@ def get_mura_ds_by_body_part(body_parts, tfds_path, batch_size, crop_size, load_
     return A_B_dataset, A_B_dataset_valid, A_B_dataset_test, len_dataset_train
 
 
-get_mura_ds_by_body_part_split_class('XR_WRIST', "/Users/dimitrymindlin/tensorflow_datasets", 32, 256, 256,
-                                     special_normalisation=None)
+"""get_mura_ds_by_body_part_split_class('XR_WRIST', "/Users/dimitrymindlin/tensorflow_datasets", 32, 256, 256,
+                                     special_normalisation=None)"""
