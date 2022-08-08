@@ -91,7 +91,7 @@ def make_concat_dataset(A_img_paths, B_img_paths, batch_size, load_size, crop_si
     A_img_paths.extend(B_img_paths)  # becoming all_image_paths
     all_image_paths = A_img_paths
     return make_dataset(all_image_paths, batch_size, load_size, crop_size, training, drop_remainder=True,
-                        shuffle=shuffle, repeat=0, labels=class_labels,
+                        shuffle=shuffle, repeat=1, labels=class_labels,
                         special_normalisation=special_normalisation), dataset_length
 
 
