@@ -111,9 +111,9 @@ def get_mura_data_paths(body_parts: List[str], tfds_path: str, test_size=0.2):
     def filenames(parts, train=True):
         data_root = tfds_path + '/downloads/cjinny_mura-v11/'
         if train:
-            csv_path = data_root + "/MURA-v1.1/train_image_paths.csv"
+            csv_path = data_root + "MURA-v1.1/train_image_paths.csv"
         else:
-            csv_path = data_root + "/MURA-v1.1/valid_image_paths.csv"
+            csv_path = data_root + "MURA-v1.1/valid_image_paths.csv"
 
         with open(csv_path, 'rb') as F:
             d = F.readlines()
