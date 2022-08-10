@@ -84,7 +84,7 @@ def make_zip_dataset(A_img_paths, B_img_paths, batch_size, load_size, crop_size,
 
 
 def make_concat_dataset(A_img_paths, B_img_paths, batch_size, load_size, crop_size, training, shuffle=True,
-                        repeat=False, special_normalisation=None):
+                        special_normalisation=None):
     dataset_length = len(A_img_paths) + len(B_img_paths)
     class_labels = [(1, 0) for _ in range(len(A_img_paths))]
     class_labels.extend([(0, 1) for _ in range(len(B_img_paths))])
@@ -196,16 +196,16 @@ def get_mura_ds_by_body_part(body_parts, tfds_path, batch_size, crop_size, load_
     A_train, B_train, A_valid, B_valid, A_test, B_test = get_split_dataset_paths(body_parts, tfds_path)
     A_B_dataset, len_dataset_train = make_concat_dataset(A_train, B_train, batch_size,
                                                          load_size,
-                                                         crop_size, training=True, repeat=False,
+                                                         crop_size, training=True,
                                                          special_normalisation=special_normalisation)
 
     A_B_dataset_valid, _ = make_concat_dataset(A_valid, B_valid, batch_size,
                                                load_size,
-                                               crop_size, training=True, repeat=False,
+                                               crop_size, training=False,
                                                special_normalisation=special_normalisation)
 
     A_B_dataset_test, _ = make_concat_dataset(A_test, B_test, batch_size, load_size,
-                                              crop_size, training=True, repeat=False,
+                                              crop_size, training=False,
                                               special_normalisation=special_normalisation)
     return A_B_dataset, A_B_dataset_valid, A_B_dataset_test, len_dataset_train
 
