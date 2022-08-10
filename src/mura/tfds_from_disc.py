@@ -18,10 +18,10 @@ def make_dataset(img_paths, batch_size, load_size, crop_size, training, drop_rem
         def _map_fn(img, label=None):  # preprocessing
             img = tf.cast(img, tf.float32)
             img = tf.image.random_flip_left_right(img)
-            # img = tf.image.random_contrast(img, 0.3, 0.8)
-            # img = tf.image.random_brightness(img, 0.3)
-            # gamma = tf.random.uniform(minval=0.9, maxval=1.1, shape=[1, ])
-            # img = tf.image.adjust_gamma(img, gamma=gamma[0])
+            img = tf.image.random_contrast(img, 0.3, 0.8)
+            img = tf.image.random_brightness(img, 0.3)
+            gamma = tf.random.uniform(minval=0.9, maxval=1.1, shape=[1, ])
+            img = tf.image.adjust_gamma(img, gamma=gamma[0])
             img = tf.image.resize_with_pad(img, load_size, load_size, method=tf.image.ResizeMethod.NEAREST_NEIGHBOR)
             img = tf.image.random_crop(img, [crop_size, crop_size, tf.shape(img)[-1]])
             if not special_normalisation:
@@ -84,7 +84,7 @@ def make_zip_dataset(A_img_paths, B_img_paths, batch_size, load_size, crop_size,
     return A_B_dataset, len_dataset
 
 
-def make_concat_dataset(A_img_paths, B_img_paths, batch_size, load_size, crop_size, training, shuffle=True,
+def make_concat_dataset(A_img_paths, B_img_paths, batch_size, load_size, crop_size, training, shuffle=False,
                         special_normalisation=None):
     dataset_length = len(A_img_paths) + len(B_img_paths)
     class_labels = [(1, 0) for _ in range(len(A_img_paths))]
@@ -196,7 +196,7 @@ def get_mura_ds_by_body_part(body_parts, tfds_path, batch_size, crop_size, load_
     A_train, B_train, A_valid, B_valid, A_test, B_test = get_split_dataset_paths(body_parts, tfds_path)
     A_B_dataset, len_dataset_train = make_concat_dataset(A_train, B_train, batch_size,
                                                          load_size,
-                                                         crop_size, training=True,
+                                                         crop_size, training=True, shuffle=True,
                                                          special_normalisation=special_normalisation)
 
     A_B_dataset_valid, _ = make_concat_dataset(A_valid, B_valid, batch_size,
