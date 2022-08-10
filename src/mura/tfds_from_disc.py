@@ -18,10 +18,10 @@ def make_dataset(img_paths, batch_size, load_size, crop_size, training, drop_rem
         def _map_fn(img, label=None):  # preprocessing
             img = tf.cast(img, tf.float32)
             img = tf.image.random_flip_left_right(img)
-            img = tf.image.random_contrast(img, 0.3, 0.8)
-            img = tf.image.random_brightness(img, 0.3)
-            gamma = tf.random.uniform(minval=0.9, maxval=1.1, shape=[1, ])
-            img = tf.image.adjust_gamma(img, gamma=gamma[0])
+            # img = tf.image.random_contrast(img, 0.3, 0.8)
+            # img = tf.image.random_brightness(img, 0.3)
+            # gamma = tf.random.uniform(minval=0.9, maxval=1.1, shape=[1, ])
+            # img = tf.image.adjust_gamma(img, gamma=gamma[0])
             img = tf.image.resize_with_pad(img, load_size, load_size, method=tf.image.ResizeMethod.NEAREST_NEIGHBOR)
             img = tf.image.random_crop(img, [crop_size, crop_size, tf.shape(img)[-1]])
             if not special_normalisation:
@@ -37,6 +37,7 @@ def make_dataset(img_paths, batch_size, load_size, crop_size, training, drop_rem
             img = tf.cast(img, tf.float32)
             # img = tfa.image.equalize(img)
             img = tf.image.resize_with_pad(img, crop_size, crop_size, method=tf.image.ResizeMethod.NEAREST_NEIGHBOR)
+            img = tf.image.random_crop(img, [crop_size, crop_size, tf.shape(img)[-1]])
             if not special_normalisation:
                 img = img / 255.0 * 2 - 1
             else:
@@ -121,9 +122,7 @@ def get_mura_data_paths(body_parts: List[str], tfds_path: str, valid_percentage=
                 imgs = [data_root + str(x, encoding='utf-8').strip() for x in d]
             else:
                 imgs = [data_root + str(x, encoding='utf-8').strip().replace("MURA-v1.1", "MURA-v1.1_transformed") for x
-                        in d
-                        if
-                        str(x, encoding='utf-8').strip().split('/')[2] in body_parts]
+                        in d if str(x, encoding='utf-8').strip().split('/')[2] in body_parts]
         if len(imgs) == 0:
             raise FileNotFoundError(f"Couldn't filter dataset based on {body_parts}. Check if spelling is correct.")
         # imgs= [x.replace("/", "\\") for x in imgs]
@@ -131,10 +130,10 @@ def get_mura_data_paths(body_parts: List[str], tfds_path: str, valid_percentage=
         return imgs, labels
 
     train_x, train_y = filenames(parts=body_parts)  # train data
-    test_x, test_y = filenames(parts=body_parts, train=False)  # test data
     train_x, valid_x, train_y, valid_y = train_test_split(train_x, train_y,
                                                           test_size=valid_percentage,
                                                           random_state=42)  # split train and valid data
+    test_x, test_y = filenames(parts=body_parts, train=False)  # test data
 
     train_x, train_y = to_categorical(train_x, train_y)
     valid_x, valid_y = to_categorical(valid_x, valid_y)
