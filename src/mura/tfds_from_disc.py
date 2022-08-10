@@ -95,7 +95,7 @@ def make_concat_dataset(A_img_paths, B_img_paths, batch_size, load_size, crop_si
                         special_normalisation=special_normalisation), dataset_length
 
 
-def get_mura_data_paths(body_parts: List[str], tfds_path: str, test_size=0.2):
+def get_mura_data_paths(body_parts: List[str], tfds_path: str, valid_percentage=0.2):
     """
     body_parts: List of body parts to work with. Check MURA documentation for available body_parts.
     tfds_path: Path to tensorflow datasets directory.
@@ -133,7 +133,8 @@ def get_mura_data_paths(body_parts: List[str], tfds_path: str, test_size=0.2):
     train_x, train_y = filenames(parts=body_parts)  # train data
     test_x, test_y = filenames(parts=body_parts, train=False)  # test data
     train_x, valid_x, train_y, valid_y = train_test_split(train_x, train_y,
-                                                          test_size=test_size)  # split train and valid data
+                                                          test_size=valid_percentage,
+                                                          random_state=42)  # split train and valid data
 
     train_x, train_y = to_categorical(train_x, train_y)
     valid_x, valid_y = to_categorical(valid_x, valid_y)
