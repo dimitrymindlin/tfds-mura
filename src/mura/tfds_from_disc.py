@@ -8,6 +8,12 @@ from matplotlib import pyplot as plt
 from skimage.io import imread
 import numpy as np
 
+def normalize_img(img, special_normalisation):
+    if not special_normalisation or special_normalisation == tf.keras.applications.inception_v3.preprocess_input:
+        return img / tf.reduce_max(img) * 2 - 1
+    elif special_normalisation == tf.keras.applications.densenet.preprocess_input:
+        return img / tf.reduce_max(img)
+
 
 def make_dataset(img_paths, batch_size, load_size, crop_size, training, drop_remainder=True, shuffle=True, repeat=1,
                  labels=None, special_normalisation=None):
@@ -25,10 +31,7 @@ def make_dataset(img_paths, batch_size, load_size, crop_size, training, drop_rem
             img = tf.image.adjust_gamma(img, gamma=gamma[0])"""
             img = tf.image.resize_with_pad(img, load_size, load_size, method=tf.image.ResizeMethod.NEAREST_NEIGHBOR)
             img = tf.image.random_crop(img, [crop_size, crop_size, tf.shape(img)[-1]])
-            if not special_normalisation or special_normalisation == tf.keras.applications.inception_v3.preprocess_input:
-                img = img / tf.reduce_max(img) * 2 - 1
-            elif special_normalisation == tf.keras.applications.densenet.preprocess_input:
-                img = img / tf.reduce_max(img)
+            img = normalize_img(img)
             if label is not None:
                 return img, label
             return img
@@ -39,10 +42,7 @@ def make_dataset(img_paths, batch_size, load_size, crop_size, training, drop_rem
             # img = tfa.image.equalize(img)
             img = tf.image.resize_with_pad(img, crop_size, crop_size, method=tf.image.ResizeMethod.NEAREST_NEIGHBOR)
             img = tf.image.random_crop(img, [crop_size, crop_size, tf.shape(img)[-1]])
-            if not special_normalisation:
-                img = img / 255.0 * 2 - 1
-            else:
-                img = special_normalisation(img)
+            img = normalize_img(img)
             if label is not None:
                 return img, label
             return img
