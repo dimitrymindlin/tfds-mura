@@ -42,7 +42,6 @@ def make_dataset(img_paths, batch_size, load_size, crop_size, training, drop_rem
             if not special_normalisation:
                 img = img / 255.0 * 2 - 1
             else:
-                img = tf.expand_dims(img, axis=0)
                 img = special_normalisation(img)
             if label is not None:
                 return img, label
