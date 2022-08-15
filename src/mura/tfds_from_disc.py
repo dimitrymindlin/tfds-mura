@@ -6,6 +6,7 @@ from sklearn.utils import shuffle
 import tf2lib as tl
 from matplotlib import pyplot as plt
 from skimage.io import imread
+import numpy as np
 
 
 def make_dataset(img_paths, batch_size, load_size, crop_size, training, drop_remainder=True, shuffle=True, repeat=1,
@@ -14,20 +15,20 @@ def make_dataset(img_paths, batch_size, load_size, crop_size, training, drop_rem
     Returns a preprocesed batched dataset. If train=True then augmentations are applied.
     """
     if training:
-        @tf.function
+        # @tf.function
         def _map_fn(img, label=None):  # preprocessing
             img = tf.cast(img, tf.float32)
-            img = tf.image.random_flip_left_right(img)
+            """img = tf.image.random_flip_left_right(img)
             img = tf.image.random_contrast(img, 0.3, 0.8)
             img = tf.image.random_brightness(img, 0.3)
             gamma = tf.random.uniform(minval=0.9, maxval=1.1, shape=[1, ])
-            img = tf.image.adjust_gamma(img, gamma=gamma[0])
+            img = tf.image.adjust_gamma(img, gamma=gamma[0])"""
             img = tf.image.resize_with_pad(img, load_size, load_size, method=tf.image.ResizeMethod.NEAREST_NEIGHBOR)
             img = tf.image.random_crop(img, [crop_size, crop_size, tf.shape(img)[-1]])
-            if not special_normalisation:
-                img = img / 255.0 * 2 - 1
-            else:
-                img = special_normalisation(img)
+            if not special_normalisation or special_normalisation == tf.keras.applications.inception_v3.preprocess_input:
+                img = img / tf.reduce_max(img) * 2 - 1
+            elif special_normalisation == tf.keras.applications.densenet.preprocess_input:
+                img = img / tf.reduce_max(img)
             if label is not None:
                 return img, label
             return img
@@ -41,6 +42,7 @@ def make_dataset(img_paths, batch_size, load_size, crop_size, training, drop_rem
             if not special_normalisation:
                 img = img / 255.0 * 2 - 1
             else:
+                img = tf.expand_dims(img, axis=0)
                 img = special_normalisation(img)
             if label is not None:
                 return img, label
@@ -210,8 +212,23 @@ def get_mura_ds_by_body_part(body_parts, tfds_path, batch_size, crop_size, load_
     return A_B_dataset, A_B_dataset_valid, A_B_dataset_test, len_dataset_train
 
 
-"""get_mura_ds_by_body_part_split_class('XR_WRIST', "/Users/dimitrymindlin/tensorflow_datasets", 32, 256, 256,
-                                     special_normalisation=None)"""
+A_B_dataset, A_B_dataset_valid, A_B_dataset_test, len_dataset_train = get_mura_ds_by_body_part_split_class('XR_WRIST',
+                                                                                                           "/Users/dimitrymindlin/tensorflow_datasets",
+                                                                                                           32, 256, 256,
+                                                                                                           special_normalisation=None)
+
+train = []
+test = []
+for x, y in A_B_dataset:
+    train.append(x)
+    if len(train) > 50:
+        break
+for x, y in A_B_dataset_test:
+    test.append(x)
+    if len(train) > 50:
+        break
+
+print()
 
 """def tf_augmentations(image, label):
     image = tf.image.random_flip_left_right(image)
