@@ -225,10 +225,10 @@ def get_mura_test_ds_by_body_part_split_class(body_parts, tfds_path, batch_size,
     """
     A_train, B_train, A_valid, B_valid, A_test, B_test = get_split_dataset_paths(body_parts, tfds_path)
 
-    A_dataset = make_concat_dataset(A_train, A_valid, batch_size, load_size, crop_size, True, shuffle=False,
+    A_dataset, _ = make_concat_dataset(A_train, A_valid, batch_size, load_size, crop_size, True, shuffle=False,
                                     special_normalisation=None)
 
-    B_dataset = make_concat_dataset(B_train, B_valid, batch_size, load_size, crop_size, True, shuffle=False,
+    B_dataset, _ = make_concat_dataset(B_train, B_valid, batch_size, load_size, crop_size, True, shuffle=False,
                                     special_normalisation=None)
 
     A_dataset_test = make_dataset(A_test, batch_size, load_size, crop_size, training=False, drop_remainder=True,
