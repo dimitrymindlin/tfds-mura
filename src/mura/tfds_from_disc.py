@@ -8,6 +8,7 @@ from matplotlib import pyplot as plt
 from skimage.io import imread
 import numpy as np
 
+
 def normalize_img(img, special_normalisation):
     if not special_normalisation or special_normalisation == tf.keras.applications.inception_v3.preprocess_input:
         return img / tf.reduce_max(img) * 2 - 1
@@ -21,14 +22,14 @@ def make_dataset(img_paths, batch_size, load_size, crop_size, training, drop_rem
     Returns a preprocesed batched dataset. If train=True then augmentations are applied.
     """
     if training:
-        # @tf.function
+        @tf.function
         def _map_fn(img, label=None):  # preprocessing
             img = tf.cast(img, tf.float32)
-            """img = tf.image.random_flip_left_right(img)
-            img = tf.image.random_contrast(img, 0.3, 0.8)
-            img = tf.image.random_brightness(img, 0.3)
-            gamma = tf.random.uniform(minval=0.9, maxval=1.1, shape=[1, ])
-            img = tf.image.adjust_gamma(img, gamma=gamma[0])"""
+            img = tf.image.random_flip_left_right(img)
+            img = tf.image.random_contrast(img, 0.7, 1.3)
+            img = tf.image.random_brightness(img, 0.2)
+            gamma = tf.random.uniform(minval=0.8, maxval=1.2, shape=[1, ])
+            img = tf.image.adjust_gamma(img, gamma=gamma[0])
             img = tf.image.resize_with_pad(img, load_size, load_size, method=tf.image.ResizeMethod.NEAREST_NEIGHBOR)
             img = tf.image.random_crop(img, [crop_size, crop_size, tf.shape(img)[-1]])
             img = normalize_img(img, special_normalisation)
@@ -259,12 +260,14 @@ def show_tf_augmentations():
     image = tf.image.resize_with_pad(image, 512, 512)
     image = tf.math.divide(image, 255.)
     # image = tf.expand_dims(image, axis=0)
-    image_aug = tf.image.random_flip_left_right(image)
-    visualize(image, image_aug)
-    image_aug = tf.image.random_contrast(image, 0.3, 0.8)
-    visualize(image, image_aug)
-    image_aug = tf.image.random_brightness(image, 0.3)
-    visualize(image, image_aug)
-    gamma = tf.random.uniform(minval=0.9, maxval=1.1, shape=[1, ])
+    #image_aug = tf.image.random_flip_left_right(image)
+    #visualize(image, image_aug)
+    #image_aug = tf.image.random_contrast(image, 1.2, 1.21)
+    #visualize(image, image_aug)
+    #image_aug = tf.image.random_brightness(image, 0.2)
+    #visualize(image, image_aug)
+    gamma = tf.random.uniform(minval=0.7, maxval=1.31, shape=[1, ])
     image_aug = tf.image.adjust_gamma(image, gamma=gamma[0])
     visualize(image, image_aug)
+
+#show_tf_augmentations()
