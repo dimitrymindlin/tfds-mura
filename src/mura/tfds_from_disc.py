@@ -211,6 +211,34 @@ def get_mura_ds_by_body_part(body_parts, tfds_path, batch_size, crop_size, load_
     return A_B_dataset, A_B_dataset_valid, A_B_dataset_test, len_dataset_train
 
 
+def get_mura_test_ds_by_body_part_split_class(body_parts, tfds_path, batch_size, crop_size, load_size,
+                                              special_normalisation=None):
+    """
+    Method loads the TEST MURA data filtered by the specified body part two datasets split by class.
+    Can be used to test CycleGANs.
+    body_parts: List of body parts to work with. Check MURA documentation for available body_parts.
+    tfds_path: Path to tensorflow datasets directory.
+    batch_size: Batch size for the data loader.
+    crop_size: Final image size that will be cropped to.
+    load_size: The image will be loaded with this size.
+    special_normalisation: Can be any normalisation from keras preprocessing (e.g. inception_preprocessing)
+    """
+    A_train, B_train, A_valid, B_valid, A_test, B_test = get_split_dataset_paths(body_parts, tfds_path)
+
+    A_dataset = make_concat_dataset(A_train, A_valid, batch_size, load_size, crop_size, True, shuffle=False,
+                                    special_normalisation=None)
+
+    B_dataset = make_concat_dataset(B_train, B_valid, batch_size, load_size, crop_size, True, shuffle=False,
+                                    special_normalisation=None)
+
+    A_dataset_test = make_dataset(A_test, batch_size, load_size, crop_size, training=False, drop_remainder=True,
+                                     shuffle=True, repeat=1, special_normalisation=special_normalisation)
+    B_dataset_test = make_dataset(B_train, batch_size, load_size, crop_size, training=False, drop_remainder=True,
+                                     shuffle=True, repeat=1, special_normalisation=special_normalisation)
+
+    return A_dataset, B_dataset, A_dataset_test, B_dataset_test
+
+
 """A_B_dataset, A_B_dataset_valid, A_B_dataset_test, len_dataset_train = get_mura_ds_by_body_part_split_class('XR_WRIST',
                                                                                                            "/Users/dimitrymindlin/tensorflow_datasets",
                                                                                                            32, 256, 256,
@@ -260,14 +288,14 @@ def show_tf_augmentations():
     image = tf.image.resize_with_pad(image, 512, 512)
     image = tf.math.divide(image, 255.)
     # image = tf.expand_dims(image, axis=0)
-    #image_aug = tf.image.random_flip_left_right(image)
-    #visualize(image, image_aug)
-    #image_aug = tf.image.random_contrast(image, 1.2, 1.21)
-    #visualize(image, image_aug)
-    #image_aug = tf.image.random_brightness(image, 0.2)
-    #visualize(image, image_aug)
+    # image_aug = tf.image.random_flip_left_right(image)
+    # visualize(image, image_aug)
+    # image_aug = tf.image.random_contrast(image, 1.2, 1.21)
+    # visualize(image, image_aug)
+    # image_aug = tf.image.random_brightness(image, 0.2)
+    # visualize(image, image_aug)
     gamma = tf.random.uniform(minval=0.7, maxval=1.31, shape=[1, ])
     image_aug = tf.image.adjust_gamma(image, gamma=gamma[0])
     visualize(image, image_aug)
 
-#show_tf_augmentations()
+# show_tf_augmentations()
