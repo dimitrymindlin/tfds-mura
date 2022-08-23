@@ -225,7 +225,11 @@ def get_mura_test_ds_by_body_part_split_class(body_parts, tfds_path, batch_size,
     """
     A_train, B_train, A_valid, B_valid, A_test, B_test = get_split_dataset_paths(body_parts, tfds_path)
 
-    A_dataset = make_dataset(A_train.extend(A_valid), batch_size, load_size, crop_size, training=False,
+    # merge train and valid to not explude images
+    A_train.extend(A_valid)
+    B_train.extend(B_valid)
+
+    A_dataset = make_dataset(A_train, batch_size, load_size, crop_size, training=False,
                              drop_remainder=True, shuffle=True, repeat=1, special_normalisation=special_normalisation)
 
     B_dataset = make_dataset(B_train.extend(B_valid), batch_size, load_size, crop_size, training=False,
