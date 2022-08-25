@@ -236,9 +236,9 @@ def get_mura_test_ds_by_body_part_split_class(body_parts, tfds_path, batch_size,
                              drop_remainder=True, shuffle=True, repeat=1, special_normalisation=special_normalisation)
 
     A_dataset_test = make_dataset(A_test, batch_size, load_size, crop_size, training=False, drop_remainder=True,
-                                  shuffle=True, repeat=1, special_normalisation=special_normalisation)
+                                  shuffle=False, repeat=1, special_normalisation=special_normalisation)
     B_dataset_test = make_dataset(B_train, batch_size, load_size, crop_size, training=False, drop_remainder=True,
-                                  shuffle=True, repeat=1, special_normalisation=special_normalisation)
+                                  shuffle=False, repeat=1, special_normalisation=special_normalisation)
 
     return A_dataset, B_dataset, A_dataset_test, B_dataset_test
 
