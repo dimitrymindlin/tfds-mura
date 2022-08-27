@@ -25,10 +25,10 @@ def make_dataset(img_paths, batch_size, load_size, crop_size, training, drop_rem
         @tf.function
         def _map_fn(img, label=None):  # preprocessing
             img = tf.cast(img, tf.float32)
-            """img = tf.image.random_flip_left_right(img)
+            img = tf.image.random_flip_left_right(img)
             img = tf.image.random_contrast(img, 0.7, 1.3)
             img = tf.image.random_brightness(img, 0.2)
-            gamma = tf.random.uniform(minval=0.8, maxval=1.2, shape=[1, ])
+            """gamma = tf.random.uniform(minval=0.8, maxval=1.2, shape=[1, ])
             img = tf.image.adjust_gamma(img, gamma=gamma[0])"""
             img = tf.image.resize_with_pad(img, load_size, load_size, method=tf.image.ResizeMethod.NEAREST_NEIGHBOR)
             img = tf.image.random_crop(img, [crop_size, crop_size, tf.shape(img)[-1]])
